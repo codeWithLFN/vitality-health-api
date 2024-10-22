@@ -26,7 +26,7 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
        let analysisText = result.response.text();
 
        analysisText = analysisText.replace(
-           /It's important to remember that I am an AI assistant and cannot provide medical advice\./gi, 
+           /\n\nIt's important to remember that I am an AI assistant and cannot provide medical advice\./gi, 
            ''
        );
 
