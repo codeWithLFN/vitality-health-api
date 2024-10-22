@@ -18,7 +18,7 @@ const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 async function getSymptomAnalysis(symptoms, additionalInfo) {
     const prompt = `
     Act as a medical AI assistant. Based on the following symptoms and information,
-    provide a brief analysis. Include general recommendations, and state this is not a diagnosis.
+    provide a brief analysis. Include general recommendations, and clearly state that this is not a diagnosis.
     
     Symptoms: ${symptoms.join(', ')}
     Additional Information: ${additionalInfo}
@@ -39,13 +39,18 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
 
         const isCritical = criticalKeywords.some(keyword => analysisText.toLowerCase().includes(keyword));
 
-        // Format the response for better readability with bold sections
+        // Format the response for better readability
         analysisText = analysisText
-            .replace(/(Possible Conditions:)/gi, '**$1**')
-            .replace(/(General Recommendations:)/gi, '**$1**')
-            .replace(/(Warning Signs to Watch For:)/gi, '**$1**')
-            .replace(/(When to Seek Immediate Medical Attention:)/gi, '**$1**')
-            .replace(/\n/g, '\n\n'); // Add extra line breaks for better spacing
+            .replace(/(Possible Conditions:)/gi, 'Possible Conditions:')
+            .replace(/(General Recommendations:)/gi, 'General Recommendations:')
+            .replace(/(Warning Signs to Watch For:)/gi, 'Warning Signs to Watch For:')
+            .replace(/(When to Seek Immediate Medical Attention:)/gi, 'When to Seek Immediate Medical Attention:')
+            .replace(/\n{3,}/g, '\n\n') // Replace three or more new lines with two new lines
+            .replace(/\n/g, '. ') // Convert new lines to periods for a more conversational format
+            .replace(/\s{2,}/g, ' '); // Replace multiple spaces with a single space
+
+        // Add a final note about consulting a medical professional
+        analysisText += ' Please remember that this analysis is not a diagnosis and you should consult a healthcare professional for any medical concerns.';
 
         return {
             analysis: analysisText.trim(), // Trim any whitespace
