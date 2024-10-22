@@ -17,87 +17,59 @@ const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 // Generate symptom analysis
 async function getSymptomAnalysis(symptoms, additionalInfo) {
     const prompt = `
-    You are a medical AI assistant. Based on the following symptoms and additional information, 
-    provide a brief analysis. Include the following sections:
-
-    **Possible Conditions:**
-    Provide a list of potential conditions based on the symptoms.
-
-    **General Recommendations:**
-    Offer general recommendations for managing the symptoms.
-
-    **Warning Signs to Watch For:**
-    Highlight any concerning signs that may require immediate attention.
-
-    **When to Seek Immediate Medical Attention:**
-    Specify when the patient should seek immediate medical help.
-
+    Act as a medical AI assistant. Based on the following symptoms and information,
+    provide a brief analysis. Include general recommendations, and state this is not a diagnosis.
+    
     Symptoms: ${symptoms.join(', ')}
     Additional Information: ${additionalInfo}
   `;
 
-    try {
-        const result = await model.generateContent(prompt);
-        let analysisText = result.response.text();
+  try {
+    const result = await model.generateContent(prompt);
+    let analysisText = result.response.text();
 
-        // Remove unnecessary disclaimer
-        analysisText = analysisText.replace(/It's important to remember that I am an AI assistant and cannot provide medical advice\./gi, '');
+    // Remove unnecessary disclaimer and format the response
+    analysisText = analysisText.replace(/It's important to remember that I am an AI assistant and cannot provide medical advice\./gi, '');
 
-        // Remove instances of ***
-        analysisText = analysisText.replace(/\*\*\*/g, '');
+    // Check for critical conditions in the response
+    const criticalKeywords = [
+      "seek immediate medical attention", "life-threatening", "emergency",
+      "hospital", "urgent care", "severe", "risk of death", "heart attack", "stroke"
+    ];
 
-        // Check for critical conditions in the response
-        const criticalKeywords = [
-            "seek immediate medical attention", "life-threatening", "emergency",
-            "hospital", "urgent care", "severe", "risk of death", "heart attack", "stroke"
-        ];
+    const isCritical = criticalKeywords.some(keyword => analysisText.toLowerCase().includes(keyword));
 
-        const isCritical = criticalKeywords.some(keyword => analysisText.toLowerCase().includes(keyword));
+    // Format for readability
+    analysisText = analysisText.replace(/^(?=.*\*\*General Recommendations\*\*|Warning Signs:|When to Seek Immediate Medical Attention:)/gm, '\n$&')
+                               .replace(/(?:^|\n)(?=\*\*General Recommendations\*\*)/, '');
 
-        // Format the response for better readability
-        analysisText = analysisText
-            .replace(/(Possible Conditions:)/gi, '<b>Possible Conditions:</b>')
-            .replace(/(General Recommendations:)/gi, '<b>General Recommendations:</b>')
-            .replace(/(Warning Signs to Watch For:)/gi, '<b>Warning Signs to Watch For:</b>')
-            .replace(/(When to Seek Immediate Medical Attention:)/gi, '<b>When to Seek Immediate Medical Attention:</b>')
-            .replace(/\n{3,}/g, '\n\n') // Replace three or more new lines with two new lines
-            .replace(/\n/g, '. ') // Convert new lines to periods for a more conversational format
-            .replace(/\s{2,}/g, ' ') // Replace multiple spaces with a single space
-            .trim(); // Remove leading/trailing whitespace
-
-        // Add a final note about consulting a medical professional
-        analysisText += ' Please remember that this analysis is not a diagnosis, and you should consult a healthcare professional for any medical concerns.';
-
-        // Add spacing between sections for better readability
-        analysisText = analysisText.replace(/(<b>.*?:<\/b>)/g, '$1\n\n'); // Add spacing after each bold section title
-
-        return {
-            analysis: analysisText, // Return the formatted text
-            critical: isCritical // Flag indicating if it's critical
-        };
-    } catch (error) {
-        console.error('Error fetching analysis from Google Gemini:', error);
-        throw new Error('Failed to get analysis');
-    }
+    return {
+      analysis: analysisText.trim(), // Trim any whitespace
+      critical: isCritical // Flag indicating if it's critical
+    };
+  } catch (error) {
+    console.error('Error fetching analysis from Google Gemini:', error);
+    throw new Error('Failed to get analysis');
+  }
 }
 
 // Analyze symptoms endpoint
 app.post('/api/analyze-symptoms', async (req, res) => {
-    const { symptoms, additionalInfo } = req.body;
+  const { symptoms, additionalInfo } = req.body;
 
-    if (!Array.isArray(symptoms) || typeof additionalInfo !== 'string') {
-        return res.status(400).json({ error: 'Invalid input: symptoms should be an array and additionalInfo a string.' });
-    }
+  if (!Array.isArray(symptoms) || typeof additionalInfo !== 'string') {
+    return res.status(400).json({ error: 'Invalid input: symptoms should be an array and additionalInfo a string.' });
+  }
 
-    try {
-        const analysis = await getSymptomAnalysis(symptoms, additionalInfo);
-        res.json(analysis);
-    } catch {
-        res.status(500).json({ error: 'Error processing request.' });
-    }
+  try {
+    const analysis = await getSymptomAnalysis(symptoms, additionalInfo);
+    res.json(analysis);
+  } catch {
+    res.status(500).json({ error: 'Error processing request.' });
+  }
 });
 
 // Start the server
 app.listen(port, () => {
-    console.log(`Vitality Health API running on port ${port}`);
+  console.log(`Vitality Health API running on port ${port}`);
 });
