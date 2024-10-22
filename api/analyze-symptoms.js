@@ -41,19 +41,20 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
 
         // Format the response for better readability
         analysisText = analysisText
-            .replace(/(Possible Conditions:)/gi, 'Possible Conditions:')
-            .replace(/(General Recommendations:)/gi, 'General Recommendations:')
-            .replace(/(Warning Signs to Watch For:)/gi, 'Warning Signs to Watch For:')
-            .replace(/(When to Seek Immediate Medical Attention:)/gi, 'When to Seek Immediate Medical Attention:')
+            .replace(/(Possible Conditions:)/gi, '<b>Possible Conditions:</b>')
+            .replace(/(General Recommendations:)/gi, '<b>General Recommendations:</b>')
+            .replace(/(Warning Signs to Watch For:)/gi, '<b>Warning Signs to Watch For:</b>')
+            .replace(/(When to Seek Immediate Medical Attention:)/gi, '<b>When to Seek Immediate Medical Attention:</b>')
             .replace(/\n{3,}/g, '\n\n') // Replace three or more new lines with two new lines
             .replace(/\n/g, '. ') // Convert new lines to periods for a more conversational format
-            .replace(/\s{2,}/g, ' '); // Replace multiple spaces with a single space
+            .replace(/\s{2,}/g, ' ') // Replace multiple spaces with a single space
+            .trim(); // Remove leading/trailing whitespace
 
         // Add a final note about consulting a medical professional
-        analysisText += ' Please remember that this analysis is not a diagnosis and you should consult a healthcare professional for any medical concerns.';
+        analysisText += ' Please remember that this analysis is not a diagnosis, and you should consult a healthcare professional for any medical concerns.';
 
         return {
-            analysis: analysisText.trim(), // Trim any whitespace
+            analysis: analysisText, // Return the formatted text
             critical: isCritical // Flag indicating if it's critical
         };
     } catch (error) {
