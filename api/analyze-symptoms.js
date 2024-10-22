@@ -15,8 +15,6 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 // Generate symptom analysis
-javascript
-Copy code
 async function getSymptomAnalysis(symptoms, additionalInfo) {
   const prompt = `
     Act as a medical AI assistant. Based on the following symptoms and information,
