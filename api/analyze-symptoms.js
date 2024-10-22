@@ -10,7 +10,14 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', 
+    generationConfig: {
+        candidateCount: 1,
+        stopSequences: ["x"],
+        maxOutputTokens: 20,
+        temperature: 1.0,
+  }
+});
 
 async function getSymptomAnalysis(symptoms, additionalInfo) {
    const prompt = `
