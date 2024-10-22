@@ -15,25 +15,56 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 // Generate symptom analysis
+javascript
+Copy code
 async function getSymptomAnalysis(symptoms, additionalInfo) {
   const prompt = `
     Act as a medical AI assistant. Based on the following symptoms and information,
-    provide a brief analysis. Include general recommendations, and state this is not a diagnosis.
-    
+    provide a brief analysis of possible conditions. Include general recommendations
+    and clearly state this is not a diagnosis.
+
     Symptoms: ${symptoms.join(', ')}
     Additional Information: ${additionalInfo}
+
+    Please format the response with:
+    1. Possible conditions
+    2. General recommendations
+    3. Warning signs to watch for
+    4. When to seek immediate medical attention
   `;
 
   try {
-    const { response } = await model.generateContent(prompt);
-    let analysisText = response.text().replace(/It's important to remember that I am an AI assistant and cannot provide medical advice\./gi, '');
+    const result = await model.generateContent(prompt);
+    let analysisText = result.response.text();
 
-    const criticalKeywords = ["seek immediate medical attention", "life-threatening", "emergency", "hospital", "urgent care", "severe", "risk of death"];
+    // Remove the specific sentence if it exists
+    analysisText = analysisText.replace(/It's important to remember that I am an AI assistant and cannot provide medical advice\./gi, '');
+
+    // Check for critical conditions in the generated response
+    const criticalKeywords = [
+      "seek immediate medical attention",
+      "life-threatening",
+      "emergency",
+      "hospital",
+      "urgent care",
+      "severe",
+      "risk of death",
+      "heart attack",
+      "stroke"
+    ];
+
     const isCritical = criticalKeywords.some(keyword => analysisText.toLowerCase().includes(keyword));
 
-    return { analysis: analysisText.trim(), critical: isCritical };
+    // Format the response for better readability
+    analysisText = analysisText.replace(/^(?=.*\*\*General Recommendations\*\*|Important Considerations:|Remember:)/gm, '\n$&'); // Add line breaks before section titles
+    analysisText = analysisText.replace(/(?:^|\n)(?=\*\*General Recommendations\*\*)/, ''); // Remove any leading line breaks before the first section
+
+    return {
+      analysis: analysisText.trim(), // Trim any leading or trailing whitespace
+      critical: isCritical // Flag to indicate if it's critical
+    };
   } catch (error) {
-    console.error('Error fetching analysis:', error);
+    console.error('Error fetching analysis from Google Gemini:', error);
     throw new Error('Failed to get analysis');
   }
 }
