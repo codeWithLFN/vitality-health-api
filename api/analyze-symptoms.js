@@ -16,19 +16,12 @@ const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 // Generate symptom analysis
 async function getSymptomAnalysis(symptoms, additionalInfo) {
-  const prompt = `
+    const prompt = `
     Act as a medical AI assistant. Based on the following symptoms and information,
-    provide a brief analysis of possible conditions. Include general recommendations
-    and clearly state this is not a diagnosis.
-
+    provide a brief analysis. Include general recommendations, and state this is not a diagnosis.
+    
     Symptoms: ${symptoms.join(', ')}
     Additional Information: ${additionalInfo}
-
-    Please format the response with:
-    1. Possible conditions
-    2. General recommendations
-    3. Warning signs to watch for
-    4. When to seek immediate medical attention
   `;
 
   try {
