@@ -59,8 +59,7 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
             .replace(/(When to Seek Immediate Medical Attention:)/gi, '<b>When to Seek Immediate Medical Attention:</b>')
             .replace(/\n{3,}/g, '\n\n') // Replace three or more new lines with two new lines
             .replace(/\n/g, '. ') // Convert new lines to periods for a more conversational format
-            .replace(/\s{2,}/g, ' ') // Replace multiple spaces with a single space
-            .trim(); // Remove leading/trailing whitespace
+            .replace(/\s{2,}/g, ' ');
 
         // Add a final note about consulting a medical professional
         analysisText += ' Please remember that this analysis is not a diagnosis, and you should consult a healthcare professional for any medical concerns.';
