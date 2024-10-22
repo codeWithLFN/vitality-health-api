@@ -35,31 +35,24 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
     const result = await model.generateContent(prompt);
     let analysisText = result.response.text();
 
-    // Remove the specific sentence if it exists
+    // Remove unnecessary disclaimer and format the response
     analysisText = analysisText.replace(/It's important to remember that I am an AI assistant and cannot provide medical advice\./gi, '');
 
-    // Check for critical conditions in the generated response
+    // Check for critical conditions in the response
     const criticalKeywords = [
-      "seek immediate medical attention",
-      "life-threatening",
-      "emergency",
-      "hospital",
-      "urgent care",
-      "severe",
-      "risk of death",
-      "heart attack",
-      "stroke"
+      "seek immediate medical attention", "life-threatening", "emergency",
+      "hospital", "urgent care", "severe", "risk of death", "heart attack", "stroke"
     ];
 
     const isCritical = criticalKeywords.some(keyword => analysisText.toLowerCase().includes(keyword));
 
-    // Format the response for better readability
-    analysisText = analysisText.replace(/^(?=.*\*\*General Recommendations\*\*|Important Considerations:|Remember:)/gm, '\n$&'); // Add line breaks before section titles
-    analysisText = analysisText.replace(/(?:^|\n)(?=\*\*General Recommendations\*\*)/, ''); // Remove any leading line breaks before the first section
+    // Format for readability
+    analysisText = analysisText.replace(/^(?=.*\*\*General Recommendations\*\*|Warning Signs:|When to Seek Immediate Medical Attention:)/gm, '\n$&')
+                               .replace(/(?:^|\n)(?=\*\*General Recommendations\*\*)/, '');
 
     return {
-      analysis: analysisText.trim(), // Trim any leading or trailing whitespace
-      critical: isCritical // Flag to indicate if it's critical
+      analysis: analysisText.trim(), // Trim any whitespace
+      critical: isCritical // Flag indicating if it's critical
     };
   } catch (error) {
     console.error('Error fetching analysis from Google Gemini:', error);
