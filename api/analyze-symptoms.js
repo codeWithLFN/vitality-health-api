@@ -14,7 +14,7 @@ const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash',
     generationConfig: {
         candidateCount: 1,
         stopSequences: ["x"],
-        maxOutputTokens: 20,
+        maxOutputTokens: 100,
         temperature: 1.0,
   }
 });
