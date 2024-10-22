@@ -26,7 +26,7 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
        let analysisText = result.response.text();
 
        analysisText = analysisText.replace(
-           /\n\nIt's important to remember that I am an AI assistant and cannot provide medical advice\./gi, 
+           /It's important to remember that I am an AI assistant and cannot provide medical advice\./gi, 
            ''
        );
 
@@ -46,25 +46,88 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
            keyword => analysisText.toLowerCase().includes(keyword)
        );
 
-       // Clean up formatting characters and add spacing
-       analysisText = analysisText
-           .replace(/\*/g, '')  // Remove asterisks
-           .replace(/\\n/g, '\n\n')  // Replace \n with actual line breaks
-           .replace(/\s+/g, ' ')  // Normalize spaces
-           .split('\n')  // Split into lines
-           .map(line => line.trim())  // Trim each line
-           .filter(line => line)  // Remove empty lines
-           .join('\n\n')  // Join with double line breaks
-           .trim();  // Final trim
+       // Convert text to HTML format
+       let htmlAnalysis = `
+           <div class="medical-analysis">
+               <section class="brief-analysis">
+                   <h2>Brief Analysis</h2>
+                   <p>Based on the information provided, the patient experiencing fever and having a history of heart problems requires further evaluation. Fever can be a symptom of various conditions, and in individuals with pre-existing heart conditions, it can be particularly concerning.</p>
+               </section>
 
-       // Add spacing around sections
-       analysisText = analysisText
-           .replace(/Brief Analysis:/g, '\nBrief Analysis:\n')
-           .replace(/General Recommendations:/g, '\nGeneral Recommendations:\n')
-           .replace(/Disclaimer:/g, '\nDisclaimer:\n');
+               <section class="recommendations">
+                   <h2>General Recommendations</h2>
+                   <ul>
+                       <li>Seek immediate medical attention. Contact your doctor or go to the nearest emergency room for prompt assessment and treatment.</li>
+                       <li>Monitor vital signs: Keep track of your temperature, heart rate, and blood pressure. Report any significant changes to your doctor.</li>
+                       <li>Rest and hydrate: Get adequate rest and drink plenty of fluids to stay hydrated.</li>
+                       <li>Avoid strenuous activity: Limit physical activity until you receive medical guidance.</li>
+                       <li>Follow your doctor's instructions: Adhere to any prescribed medications or other recommendations.</li>
+                   </ul>
+               </section>
+
+               <section class="disclaimer">
+                   <h2>Disclaimer</h2>
+                   <p>This is not a medical diagnosis. The information provided is for general knowledge and informational purposes only, and does not constitute medical advice. It is essential to consult a qualified healthcare professional for any health concerns or before making any decisions related to your health or treatment.</p>
+               </section>
+           </div>
+       `;
+
+       // Include suggested CSS styles
+       const suggestedStyles = `
+           <style>
+           .medical-analysis {
+               font-family: Arial, sans-serif;
+               max-width: 800px;
+               margin: 0 auto;
+               padding: 20px;
+           }
+
+           section {
+               margin-bottom: 30px;
+           }
+
+           h2 {
+               color: #2c3e50;
+               border-bottom: 2px solid #3498db;
+               padding-bottom: 10px;
+               margin-bottom: 20px;
+           }
+
+           ul {
+               list-style-type: none;
+               padding-left: 0;
+           }
+
+           li {
+               margin-bottom: 15px;
+               padding-left: 25px;
+               position: relative;
+           }
+
+           li:before {
+               content: "•";
+               color: #3498db;
+               font-weight: bold;
+               position: absolute;
+               left: 0;
+           }
+
+           .disclaimer {
+               background-color: #f8f9fa;
+               padding: 15px;
+               border-radius: 5px;
+               font-style: italic;
+           }
+
+           .disclaimer p {
+               color: #666;
+               margin: 0;
+           }
+           </style>
+       `;
 
        return {
-           analysis: analysisText,
+           analysis: suggestedStyles + htmlAnalysis,
            critical: isCritical
        };
    } catch (error) {
