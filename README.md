@@ -1,6 +1,6 @@
 # 🌟 Vitality Health API 🌟
 
-Welcome to **Vitality Health API**, your medical AI assistant designed to help you understand your symptoms and provide valuable insights based on your health information. 
+Welcome to **Vitality Health API**, your medical AI assistant designed to help you understand your symptoms and provide valuable insights based on your health information.
 
 ## 🚀 Features
 
@@ -24,7 +24,6 @@ git clone https://github.com/codewithlfn/vitality-health-api.git
 cd vitality-health-api
 npm install
 ```
-
 
 ## 🤝 Contributing
 
