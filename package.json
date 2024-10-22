@@ -1,0 +1,19 @@
+{
+  "name": "vitality-health-api",
+  "version": "1.0.0",
+  "description": "API for Vitality Health - a medical AI assistant.",
+  "main": "api/analyze-symptoms.js",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "micro": "^9.3.4" 
+  },
+  "engines": {
+    "node": ">=18.0.0" 
+  },
+  "license": "ISC"
+}
