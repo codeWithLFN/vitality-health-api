@@ -43,6 +43,9 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
         // Remove unnecessary disclaimer
         analysisText = analysisText.replace(/It's important to remember that I am an AI assistant and cannot provide medical advice\./gi, '');
 
+        // Remove instances of ***
+        analysisText = analysisText.replace(/\*\*\*/g, '');
+
         // Check for critical conditions in the response
         const criticalKeywords = [
             "seek immediate medical attention", "life-threatening", "emergency",
@@ -59,10 +62,14 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
             .replace(/(When to Seek Immediate Medical Attention:)/gi, '<b>When to Seek Immediate Medical Attention:</b>')
             .replace(/\n{3,}/g, '\n\n') // Replace three or more new lines with two new lines
             .replace(/\n/g, '. ') // Convert new lines to periods for a more conversational format
-            .replace(/\s{2,}/g, ' ');
+            .replace(/\s{2,}/g, ' ') // Replace multiple spaces with a single space
+            .trim(); // Remove leading/trailing whitespace
 
         // Add a final note about consulting a medical professional
         analysisText += ' Please remember that this analysis is not a diagnosis, and you should consult a healthcare professional for any medical concerns.';
+
+        // Add spacing between sections for better readability
+        analysisText = analysisText.replace(/(<b>.*?:<\/b>)/g, '$1\n\n'); // Add spacing after each bold section title
 
         return {
             analysis: analysisText, // Return the formatted text
