@@ -19,11 +19,33 @@ const model = genAI.getGenerativeModel({
 
 async function getSymptomAnalysis(symptoms, additionalInfo) {
   const prompt = `
-    Act as a medical AI assistant. Based on the following symptoms and information,
-    provide a brief analysis. Include general recommendations, and state this is not a diagnosis.
+    You are BantuHealth AI, a medical assistant. Analyze the following symptoms and information:
 
-    Symptoms: ${symptoms.join(', ')}
-    Additional Information: ${additionalInfo}
+    SYMPTOMS:
+    ${symptoms.join(', ')}
+
+    ADDITIONAL INFORMATION:
+    ${additionalInfo}
+
+    Please provide a structured response with the following sections:
+
+    1. INITIAL ASSESSMENT:
+    - Brief overview of the situation
+    - Potential conditions to consider
+
+    2. RECOMMENDATIONS:
+    - Immediate actions to take
+    - Lifestyle modifications
+    - Self-care measures
+
+    3. URGENCY LEVEL:
+    - Rate urgency (Low/Medium/High)
+    - Specify if immediate medical attention is needed
+
+    4. DISCLAIMER:
+    Include a clear medical disclaimer
+
+    Keep the response professional but easy to understand. Focus on actionable advice and clear next steps.
   `;
 
   try {
@@ -46,13 +68,13 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
       keyword => analysisText.toLowerCase().includes(keyword)
     );
 
-    // Extract recommendations from the analysis text
-    const recommendations = extractRecommendations(analysisText);
+    const sections = parseAnalysisSections(analysisText);
 
     return {
       analysis: analysisText,
-      recommendations: recommendations,
-      critical: isCritical
+      structured: sections,
+      critical: isCritical,
+      timestamp: new Date().toISOString()
     };
   } catch (error) {
     console.error('Error fetching analysis from Google Gemini:', error);
@@ -60,15 +82,29 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
   }
 }
 
-// Function to extract recommendations from the analysis text
-function extractRecommendations(analysisText) {
-  // This is a placeholder implementation. You can adjust this logic based on how
-  // recommendations are formatted in the analysis text.
-  const recommendationStart = analysisText.indexOf('General Recommendations:');
-  if (recommendationStart !== -1) {
-    return analysisText.substring(recommendationStart).trim();
+function parseAnalysisSections(analysisText) {
+  const sections = {
+    assessment: '',
+    recommendations: '',
+    urgency: '',
+    disclaimer: ''
+  };
+
+  const sectionMatches = {
+    assessment: /INITIAL ASSESSMENT:(.*?)(?=RECOMMENDATIONS:|$)/s,
+    recommendations: /RECOMMENDATIONS:(.*?)(?=URGENCY LEVEL:|$)/s,
+    urgency: /URGENCY LEVEL:(.*?)(?=DISCLAIMER:|$)/s,
+    disclaimer: /DISCLAIMER:(.*?)$/s
+  };
+
+  for (const [key, regex] of Object.entries(sectionMatches)) {
+    const match = analysisText.match(regex);
+    if (match) {
+      sections[key] = match[1].trim();
+    }
   }
-  return 'No specific recommendations provided.';
+
+  return sections;
 }
 
 app.post('/api/analyze-symptoms', async (req, res) => {
@@ -83,11 +119,15 @@ app.post('/api/analyze-symptoms', async (req, res) => {
   try {
     const analysis = await getSymptomAnalysis(symptoms, additionalInfo);
     res.json(analysis);
-  } catch {
-    res.status(500).json({ error: 'Error processing request.' });
+  } catch (error) {
+    console.error('API Error:', error);
+    res.status(500).json({ 
+      error: 'Error processing request.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Vitality Health API running on port ${port}`);
+  console.log(`BantuHealth AI API running on port ${port}`);
 });
