@@ -11,11 +11,9 @@ app.use(express.json());
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
-  model: 'gemini-1.5-flash',
+  model: 'gemini-1.5-pro',
   generationConfig: {
     candidateCount: 1,
-    stopSequences: ["x"],
-    temperature: 1.0,
   },
 });
 
