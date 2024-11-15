@@ -58,7 +58,7 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
     const result = await model.generateContent(prompt);
     const analysisText = result.response.text();
 
-    /*
+    /*// Commented out for now, can be used to check for critical keywords
     const criticalKeywords = [
       "seek immediate medical attention",
       "life-threatening",
