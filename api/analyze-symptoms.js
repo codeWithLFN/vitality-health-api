@@ -2,13 +2,17 @@ import express from 'express';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 
+// Load environment variables from .env file
 dotenv.config();
 
+// Initialize the Express app
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Middleware to parse JSON body
 app.use(express.json());
 
+// Initialize the Google Generative AI model
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
   model: 'gemini-1.5-flash',
@@ -18,6 +22,7 @@ const model = genAI.getGenerativeModel({
 });
 
 async function getSymptomAnalysis(symptoms, additionalInfo) {
+  // Construct the prompt for the AI model
   const prompt = `
     You are BantuHealth AI, a medical assistant. Analyze the following symptoms and information:
 
@@ -48,10 +53,12 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
     Keep the response professional but easy to understand. Focus on actionable advice and clear next steps.
   `;
 
+  // Generate content using the Google Gemini model
   try {
     const result = await model.generateContent(prompt);
     const analysisText = result.response.text();
 
+    /*
     const criticalKeywords = [
       "seek immediate medical attention",
       "life-threatening",
@@ -63,11 +70,21 @@ async function getSymptomAnalysis(symptoms, additionalInfo) {
       "heart attack",
       "stroke"
     ];
+    */
 
-    const isCritical = criticalKeywords.some(
+    // Define urgency levels
+    const urgencyLevels = [
+      "low",
+      "medium",
+      "high"
+    ];
+
+    // Check if any critical keywords are present in the analysis
+    const isCritical = urgencyLevels.some(
       keyword => analysisText.toLowerCase().includes(keyword)
     );
 
+    // Parse the analysis into structured sections
     const sections = parseAnalysisSections(analysisText);
 
     return {
