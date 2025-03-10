@@ -124,6 +124,7 @@ function parseAnalysisSections(analysisText) {
   return sections;
 }
 
+// API endpoint to post symptoms for analysis
 app.post('/api/analyze-symptoms', async (req, res) => {
   const { symptoms, additionalInfo } = req.body;
 
@@ -145,6 +146,41 @@ app.post('/api/analyze-symptoms', async (req, res) => {
   }
 });
 
+//api endpoint to get the model
+app.get('/api/model', async (req, res) => {
+  res.json({ model: model.model });
+});
+
+//api endponit to check the health of the api
+app.get('/api/health', async (req, res) => {
+  const health = {
+    status: 'ok',
+    timestamp: new Date().toISOString()
+  };
+  res.json(health);
+});
+
+//api endpoint to get the version of the api
+app.get('/api/version', async (req, res) => {
+  const version = {
+    version: '1.0.0',
+    timestamp: new Date().toISOString()
+  };
+  res.json(version);
+});
+
+//api endpoint to get the status of the api
+app.get('/api/status', async (req, res) => {
+  const status = {
+    status: 'running',
+    timestamp: new Date().toISOString()
+  };
+  res.json(status);
+});
+
+
+// Start the Express server
 app.listen(port, () => {
   console.log(`BantuHealth AI API running on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
